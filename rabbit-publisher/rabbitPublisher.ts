@@ -1,19 +1,19 @@
 import amqp from "amqplib";
 import rabbitObj from "./rabbitInterface";
 
-const connect=async ():Promise<rabbitObj>=>{
+const connectRabbit=async ():Promise<rabbitObj>=>{
     try{
-        console.log("trying to connect")
+        console.log("trying to connect to rabbitmq")
         const connection:amqp.Connection=await amqp.connect("amqp://localhost");
         const channel:amqp.Channel=await connection.createChannel();
-        const results:any=await channel.assertQueue("orders");
+        const queue:any=await channel.assertQueue("orders");
 
-        return ({channelProp:channel,resultsProp:results});
+        return ({channelProp:channel,resultsProp:queue});
     }
     catch(err){
         console.log(err," error connecting to rabbit");
         await wait();
-        const obj:rabbitObj=await connect();
+        const obj:rabbitObj=await connectRabbit();
         return obj;
     }
 }
@@ -31,5 +31,5 @@ const wait=async ():Promise<Boolean>=>{
 }
 
 
-export default connect;
+export default connectRabbit;
 
