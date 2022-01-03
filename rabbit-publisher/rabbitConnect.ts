@@ -24,5 +24,9 @@ class RabbitClass{
         return this.channel;
     }
 
+    resetChannel():void{
+        this.channel=null;
+    }
+
 }
 export default RabbitClass;

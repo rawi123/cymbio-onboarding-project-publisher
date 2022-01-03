@@ -1,27 +1,27 @@
 import {Request, Response} from "express";
 import RabbitClass from "../rabbit-publisher/rabbitConnect"
-import {ordersQueue} from "../rabbit-publisher/createRabbitOrders";
+import getRabbitQueue from "../rabbit-publisher/getRabbitQueue";
 import amqp from "amqplib";
+import rabbitHealthCheck from "../rabbit-publisher/healthCheck";
 
 
-export const healthCheck = (req: Request, res: Response): void => {
+export const healthCheck = async(req: Request, res: Response): Promise<void> => {
     const queueNameToCheck:string=req.body.queue;
-    const queue:RabbitClass|null=getQueue(queueNameToCheck);
-
-    if(!queue?.getChannel())
-        res.status(200).json("Server up but queue down")
+    const queue:RabbitClass|null=getRabbitQueue(queueNameToCheck);
+    console.log(await rabbitHealthCheck());
+    if(!queue?.getChannel() || !await rabbitHealthCheck())
+        res.status(200).json("Server up but queue down, try get rabbit-health-check request to restart rabbit")
 
     else
         res.status(200).json("Server & rabbit up");
 }
 
-const getQueue=(queueName:string):RabbitClass|null=>{
-    if(queueName==="orders")
-        return ordersQueue;
-    return null
-}
 
 export const addToQueue = async (req: Request, res: Response, rabbitQueue: RabbitClass): Promise<void> => {
+    if(!await rabbitHealthCheck()){
+        res.status(404).json("rabbitmq down")
+        return;
+    }
 
     let rabbitChannel: amqp.Channel | null = rabbitQueue.getChannel();
 
