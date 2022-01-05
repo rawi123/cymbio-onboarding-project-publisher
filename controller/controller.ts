@@ -8,7 +8,7 @@ import rabbitHealthCheck from "../rabbit-publisher/healthCheck";
 export const healthCheck = async(req: Request, res: Response): Promise<void> => {
     const queueNameToCheck:string=req.body.queue;
     const queue:RabbitClass|null=getRabbitQueue(queueNameToCheck);
-    console.log(await rabbitHealthCheck());
+
     if(!queue?.getChannel() || !await rabbitHealthCheck())
         res.status(200).json("Server up but queue down, try get rabbit-health-check request to restart rabbit")
 
@@ -30,8 +30,8 @@ export const addToQueue = async (req: Request, res: Response, rabbitQueue: Rabbi
         if (rabbitChannel === null) throw ("channel is null");
         const messageBuffed = Buffer.from(JSON.stringify(req.body));
 
-        rabbitChannel.sendToQueue("orders", messageBuffed);
-        console.log("sent message to queue - orders");
+        rabbitChannel.sendToQueue(rabbitQueue.channelName, messageBuffed);
+        console.log("sent message to queue - ",rabbitQueue.channelName);
 
         res.status(200).json("message added to queue");
     } catch (err) {

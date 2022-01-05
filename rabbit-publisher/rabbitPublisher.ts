@@ -3,7 +3,6 @@ import rabbitObj from "./rabbitInterface";
 
 const connectRabbit = async (tries: number = 0): Promise<rabbitObj> => {//class- connect get channel
     try {
-
         console.log("trying to connect to rabbitmq")
         const connection: amqp.Connection = await amqp.connect("amqp://localhost");
         const channel: amqp.Channel = await connection.createChannel();
